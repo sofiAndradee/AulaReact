@@ -1,3 +1,5 @@
+//Importa o css 
+import "./App.css"
 //Inportanto nosso hook useState da biblioteca React 
 //Ele permite amezenar valores e atualizar a tela automaticamente 
 
@@ -19,10 +21,55 @@ import { useState } from "react";
   //Estado responsavel por armazernar a Umidade da cidade 
   const [umidade, setUmidade ] = useState("");
 
- 
+
+  // Funçao executada quando os usuario clicar no botão consultar 
+  async function consultarClima() {
+
+
+    //Verifica se o campo está vazio 
+    if (cidade === ""){
+      alert("Digite uma cidade!!!");
+      return;
+    }
+
+    try{
+
+      // Faz a requisição para a API
+      const resposta = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${cidade}$appid=879ba2d5a4086028183b75df8b174667&units=metric&lang=pt-br`
+        
+      );
+      //converte a resposta para JSON 
+      const dados = await resposta.json();
+
+
+      //Verifica se a cidade foi encontrada 
+      if (dados.cod !== 200){
+        alert("Cidade não encontrada");
+        return; 
+      }
+
+
+      // Atualiza a temperatura
+      setTemperatura(dados.main.temp + "°C");
+
+      //Atualiza a condição climática
+      setClima(dados.weather[0].description);
+
+      // Atualiza a umidade
+      setUmidade(dados.main.humidity + "%");
+
+    }catch (erro) {
+
+      console.log(erro);
+
+      alert("Erro ao consultar a API. ");
+
+    }
+  }
 
   //Fnção executada quando o usuario clicar no botão consultar 
-  function consultarClima(){
+  /* function consultarClima(){
     //Verifica se a cidade digitada é São Paulo 
     if(
       cidade.toLowerCase() === "são paulo " || 
@@ -76,58 +123,54 @@ import { useState } from "react";
       setUmidade("--");
 
     }
-  }
+  } */
 //importa a inteface visual do sistema 
 return(
   //container principal da aplicação
-<div
-style={{
-    padding: "20px",
-    fontFamily: "Arial"
+<div className="app-container">
+      <div className="weather-card">
+        {/* Titulo Principal */}
+        <h1 className="weather-title">PREVISÃO DO TEMPO ☁️</h1>
 
-  }}>
-    {/* Titulo Principal */}
-    <h1>Sistema de previsão do tempo☁️</h1>
+        {/* Campo para digitação e botão */}
+        <div className="search-box">
+          <input 
+            type="text"
+            placeholder="Digite o nome da cidade..."
+            value={cidade}
+            onChange={(e) => setCidade(e.target.value)}
+            className="weather-input"
+          />
+          
+          <button onClick={consultarClima} className="weather-button">
+            Consultar
+          </button>
+        </div>
 
-    {/*Campo para digitação*/ }
+        {/* Linha horizontal para separar seções */}
+        <hr className="weather-divider" />
 
-    <input 
-    //tipo do compo
-    type="text"
-    //Texto exibindo dentro da caixa
-    placeholder="Digite uma cidade"
-
-    //Valor vinculado ao estado cidade
-    value={cidade}
-
-    //Atualiza o estado quando o usuario digita
-    onChange={(e) => setCidade(e.target.value)}/>
+        {/* Resultados */}
+        <div className="results-container">
+          <div className="result-item">
+            <span className="result-label">Cidade:</span>
+            <span className="result-value">{cidade || "--"}</span>
+          </div>
+          <div className="result-item">
+            <span className="result-label">Temperatura:</span>
+            <span className="result-value">{temperatura || "--"}</span>
+          </div>
+          <div className="result-item">
+            <span className="result-label">Clima:</span>
+            <span className="result-value">{clima || "--"}</span>
+          </div>
+          <div className="result-item">
+            <span className="result-label">Umidade:</span>
+            <span className="result-value">{umidade || "--"}</span>
+          </div>
+        </div>
+      </div>
     
-    
-
-
-    {/* Botão de consulta*/}
-    <button
-    
-    //Executa a função consultarClima()
-    onClick={consultarClima}
-    
-    style={{
-
-      marginLeft: "10px"
-    }}
-    >
-      {/* Texto exibido no botão */}
-      Consultar
-
-    </button>
-    {/*Linha horizonatal para separar seções */}
-    <hr />
-    <h2>Cidade: {cidade}</h2>
-    <h2>Temperatura: {temperatura} </h2>
-    <h2>Clima: {clima}</h2>
-    <h2>Umidade {umidade}</h2>   
-
 </div>
 
 )
